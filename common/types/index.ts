@@ -6,6 +6,14 @@ export enum ApplicationStatus {
   REJECTED = "Rejected",
 }
 
+export const PERMIT_TYPES = [
+  "تصريح بناء",
+  "تصريح تجاري",
+  "تصريح مهني",
+  "تصريح فعالية",
+  "تصريح آخر",
+] as const;
+
 export const PermitApplicationSchema = z.object({
   applicant_name: z
     .string()
@@ -16,7 +24,7 @@ export const PermitApplicationSchema = z.object({
     .string()
     .email("البريد الإلكتروني غير صالح")
     .min(1, "البريد الإلكتروني مطلوب"),
-  permit_type: z.enum(PERMIT_TYPES).string().min(1, "نوع التصريح مطلوب"),
+  permit_type: z.enum(PERMIT_TYPES),
 });
 
 export const PermitApplicationResponseSchema = PermitApplicationSchema.extend({
@@ -27,14 +35,6 @@ export const PermitApplicationResponseSchema = PermitApplicationSchema.extend({
 
 export type PermitApplicationInput = z.infer<typeof PermitApplicationSchema>;
 export type PermitApplication = z.infer<typeof PermitApplicationResponseSchema>;
-
-export const PERMIT_TYPES = [
-  "تصريح بناء",
-  "تصريح تجاري",
-  "تصريح مهني",
-  "تصريح فعالية",
-  "تصريح آخر",
-] as const;
 
 export const STATUS_LABELS: Record<ApplicationStatus, string> = {
   [ApplicationStatus.PENDING]: "قيد المراجعة",

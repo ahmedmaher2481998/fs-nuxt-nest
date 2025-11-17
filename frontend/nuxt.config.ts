@@ -4,6 +4,14 @@ export default defineNuxtConfig({
 
   modules: ['@nuxtjs/tailwindcss'],
 
+  alias: {
+    '@common': '/common',
+  },
+
+  tailwindcss: {
+    cssPath: '~/assets/css/tailwind.css',
+  },
+
   runtimeConfig: {
     public: {
       backendApiUrl: process.env.BACKEND_API_URL || 'http://localhost:3001',
@@ -30,10 +38,6 @@ export default defineNuxtConfig({
           rel: 'stylesheet',
           href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap',
         },
-        {
-          rel: 'stylesheet',
-          href: '/main.css',
-        },
       ],
     },
   },
@@ -46,6 +50,11 @@ export default defineNuxtConfig({
   },
 
   vite: {
+    resolve: {
+      alias: {
+        '@common': '/common',
+      },
+    },
     server: {
       host: '0.0.0.0',
       port: 3000,
