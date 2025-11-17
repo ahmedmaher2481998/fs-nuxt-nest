@@ -1,0 +1,26 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model PermitApplication {
+  id                 String            @id @default(uuid())
+  applicant_name     String
+  applicant_email    String
+  permit_type        String
+  application_status ApplicationStatus @default(Pending)
+  submitted_at       DateTime          @default(now())
+
+  @@map("permit_applications")
+}
+
+enum ApplicationStatus {
+  Pending
+  Approved
+  Rejected
+}

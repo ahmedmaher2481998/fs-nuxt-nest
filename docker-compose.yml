@@ -1,0 +1,78 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: permits_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-permituser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-permitpass}
+      POSTGRES_DB: ${POSTGRES_DB:-permits_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - permits-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U permituser -d permits_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: permits_backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-permituser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-permitpass}
+      POSTGRES_DB: ${POSTGRES_DB:-permits_db}
+      DATABASE_URL: postgresql://permituser:permitpass@postgres:5432/permits_db
+      BACKEND_PORT: 3001
+      BACKEND_HOST: 0.0.0.0
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - permits-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: npm run start:dev
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: permits_frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      NUXT_PORT: 3000
+      NUXT_HOST: 0.0.0.0
+      BACKEND_API_URL: http://backend:3001
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.nuxt
+    networks:
+      - permits-network
+    depends_on:
+      - backend
+    command: npm run dev
+
+networks:
+  permits-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
